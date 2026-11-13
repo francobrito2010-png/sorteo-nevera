@@ -259,7 +259,9 @@ function state(){
 }
 
 /* ---------- demo bots ---------- */
-const BOTS=[["b1","Lucas"],["b2","Amélie"],["b3","João"],["b4","Sofía"]];
+const BOTS=[["demo-bot-1","Lucas"],["demo-bot-2","Amélie"],["demo-bot-3","João"],["demo-bot-4","Sofía"]];
+const BOT_IDS=new Set(BOTS.map(b=>b[0]));
+addEventListener("hashchange",()=>location.reload()); // switching to/from #demo reloads the page in the right mode
 let botsStarted=false, botsReady=false;
 function demoTick(players){
   if(!DEMO) return;
@@ -269,7 +271,7 @@ function demoTick(players){
     BOTS.forEach(([id,name],i)=>setTimeout(()=>send({t:"join",dev:id,name,seed:Math.random().toString(36)}), 1200*(i+1)));
   }
   const five=players.slice(0,N);
-  const botsIn=five.filter(p=>p.id.startsWith("b")).length===4;
+  const botsIn=five.filter(p=>BOT_IDS.has(p.id)).length===4;
   if(botsIn && !botsReady && (spectator || mine?.ready || five.filter(p=>p.ready).length>0)){
     botsReady=true;
     BOTS.forEach(([id],i)=>setTimeout(()=>send({t:"ready",dev:id}), 900*(i+1)));
