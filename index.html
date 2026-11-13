@@ -161,7 +161,7 @@ const isAdmin = DEMO;                     // the real reset lives on a separate 
 
 const T = {
   es:{title:"Sorteo de la Nevera",s1:"Apúntate",s2:"Esperad a 5",s3:"Todos listos",s4:"¡Sorteo!",
-    demo:"MODO DEMO · los otros 4 jugadores son simulados",loading:"Conectando…",
+    demo:"MODO DEMO v4 · los otros 4 jugadores son simulados",loading:"Conectando…",
     joinTitle:"¿Cómo te llamas?",joinHelp:"Escribe tu nombre para entrar en el sorteo de los 5 espacios de la nevera. Solo se puede participar una vez por móvil.",joinBtn:"Entrar al sorteo",ph:"Tu nombre",
     fullTitle:"El sorteo está completo",fullHelp:"Ya hay 5 personas apuntadas. Puedes ver el resultado aquí cuando se haga.",
     waitTitle:"Esperando a los demás",waitHelp:n=>`Faltan ${n}. Comparte el enlace con tus compañeros de piso.`,
@@ -172,7 +172,7 @@ const T = {
     drawing:"Sorteando…",done:"¡Este es el resultado!",yourSpace:"Tu espacio en la nevera",shelf:"Espacio",top:"arriba",bottom:"abajo",
     reset:"Reiniciar el sorteo (organizador)",resetSure:"Pulsa otra vez para confirmar",err:"No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.",offline:"Sin conexión. Reintentando…"},
   en:{title:"Fridge Draw",s1:"Sign up",s2:"Wait for 5",s3:"All ready",s4:"Draw!",
-    demo:"DEMO MODE · the other 4 players are simulated",loading:"Connecting…",
+    demo:"DEMO MODE v4 · the other 4 players are simulated",loading:"Connecting…",
     joinTitle:"What's your name?",joinHelp:"Type your name to enter the draw for the 5 fridge spaces. One entry per phone.",joinBtn:"Join the draw",ph:"Your name",
     fullTitle:"The draw is full",fullHelp:"5 people have already signed up. You can see the result here once it's done.",
     waitTitle:"Waiting for the others",waitHelp:n=>`${n} more to go. Share the link with your flatmates.`,
@@ -183,7 +183,7 @@ const T = {
     drawing:"Drawing…",done:"Here's the result!",yourSpace:"Your fridge space",shelf:"Space",top:"top",bottom:"bottom",
     reset:"Restart the draw (organiser)",resetSure:"Press again to confirm",err:"Couldn't send. Check your connection and try again.",offline:"Offline. Retrying…"},
   pt:{title:"Sorteio do Frigorífico",s1:"Inscreve-te",s2:"Esperar por 5",s3:"Todos prontos",s4:"Sorteio!",
-    demo:"MODO DEMO · os outros 4 jogadores são simulados",loading:"A ligar…",
+    demo:"MODO DEMO v4 · os outros 4 jogadores são simulados",loading:"A ligar…",
     joinTitle:"Como te chamas?",joinHelp:"Escreve o teu nome para entrar no sorteio dos 5 espaços do frigorífico. Só se pode participar uma vez por telemóvel.",joinBtn:"Entrar no sorteio",ph:"O teu nome",
     fullTitle:"O sorteio está completo",fullHelp:"Já há 5 pessoas inscritas. Podes ver o resultado aqui quando acontecer.",
     waitTitle:"À espera dos outros",waitHelp:n=>`Faltam ${n}. Partilha o link com os teus colegas de casa.`,
@@ -194,7 +194,7 @@ const T = {
     drawing:"A sortear…",done:"Aqui está o resultado!",yourSpace:"O teu espaço no frigorífico",shelf:"Espaço",top:"em cima",bottom:"em baixo",
     reset:"Reiniciar o sorteio (organizador)",resetSure:"Carrega outra vez para confirmar",err:"Não foi possível enviar. Verifica a ligação e tenta outra vez.",offline:"Sem ligação. A tentar de novo…"},
   fr:{title:"Tirage du Frigo",s1:"Inscris-toi",s2:"Attendre 5",s3:"Tous prêts",s4:"Tirage !",
-    demo:"MODE DÉMO · les 4 autres joueurs sont simulés",loading:"Connexion…",
+    demo:"MODE DÉMO v4 · les 4 autres joueurs sont simulés",loading:"Connexion…",
     joinTitle:"Comment tu t'appelles ?",joinHelp:"Écris ton prénom pour participer au tirage des 5 places du frigo. Une seule participation par téléphone.",joinBtn:"Participer",ph:"Ton prénom",
     fullTitle:"Le tirage est complet",fullHelp:"5 personnes sont déjà inscrites. Tu pourras voir le résultat ici.",
     waitTitle:"On attend les autres",waitHelp:n=>`Il en manque ${n}. Partage le lien avec tes colocs.`,
@@ -272,9 +272,10 @@ function demoTick(players){
   }
   const five=players.slice(0,N);
   const botsIn=five.filter(p=>BOT_IDS.has(p.id)).length===4;
-  if(botsIn && !botsReady && (spectator || mine?.ready || five.filter(p=>p.ready).length>0)){
+  // once all 4 bots are in, they press "ready" on their own, one by one
+  if(botsIn && five.length===N && !botsReady){
     botsReady=true;
-    BOTS.forEach(([id],i)=>setTimeout(()=>send({t:"ready",dev:id}), 900*(i+1)));
+    BOTS.forEach(([id],i)=>setTimeout(()=>send({t:"ready",dev:id}), 2500+1200*i));
   }
 }
 
