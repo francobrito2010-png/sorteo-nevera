@@ -382,26 +382,36 @@ function renderDraw(five){
   };
   if(drawnKey===key){ if(!animating) final(); return; }
   drawnKey=key;
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ final(); return; }
+  // no animation if the phone isn't looking at the page right now (they'll see the result when they come back)
+  if(document.hidden || matchMedia("(prefers-reduced-motion: reduce)").matches){ final(); return; }
   animating=true; $("yours").hidden=true; $("drawTitle").textContent=t("drawing");
   const names=five.map(p=>p.name);
   const cd=$("countdown"); $("fridge").hidden=true; cd.hidden=false;
+  // the whole animation has a hard time limit: if the browser slows timers down
+  // (page in background, phone busy), jump straight to the result
+  const startAt=Date.now(), MAX_MS=9000;
+  const late=()=>Date.now()-startAt>MAX_MS;
+  finishDraw=()=>{ if(animating && drawnKey===key) final(); };
   let c=3;
   const countStep=()=>{
     if(drawnKey!==key) return;
+    if(late()){ final(); return; }
     if(c===0){ cd.hidden=true; $("fridge").hidden=false; spin(); return; }
     cd.textContent=c; cd.style.animation="none"; cd.offsetHeight; cd.style.animation=""; c--; setTimeout(countStep,800);
   };
   let tick=0; const total=30;
   const spin=()=>{
     if(drawnKey!==key) return;
-    if(tick>=total){ final(); return; }
+    if(tick>=total || late()){ final(); return; }
     const sh=[...names].sort(()=>Math.random()-.5);
     fridgeRows(sh, Array.from({length:N},(_,i)=>i===tick%N?"flash":""));
     tick++; setTimeout(spin, 70+tick*tick*0.35);
   };
   countStep();
 }
+let finishDraw=()=>{};
+// coming back to the page mid-animation (e.g. after checking WhatsApp): show the result right away
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) finishDraw(); });
 
 $("joinForm").addEventListener("submit", async e=>{
   e.preventDefault();
