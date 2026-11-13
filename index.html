@@ -156,9 +156,8 @@ form{display:flex;flex-direction:column;gap:12px}
 const N = 5;
 // Shared channel for this raffle (ntfy.sh public pub/sub, no accounts). Change TOPIC to start a brand-new raffle.
 const TOPIC = "nevera-3efe546de00e";
-const ADMIN = "#org-d5192f1c";            // organiser link: add this to the URL to get the reset button
 const DEMO = location.hash === "#demo";
-const isAdmin = location.hash === ADMIN || DEMO;
+const isAdmin = DEMO;                     // the real reset lives on a separate organiser page
 
 const T = {
   es:{title:"Sorteo de la Nevera",s1:"Apúntate",s2:"Esperad a 5",s3:"Todos listos",s4:"¡Sorteo!",
