@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sorteo de la Nevera</title>
+<meta property="og:title" content="Sorteo de la Nevera 🧊">
+<meta property="og:description" content="5 personas · 5 espacios · 1 sorteo">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#eaf3f7; --card:#ffffff; --fg:#14303d; --muted:#5b7684;
+  --ice:#cfe7f1; --steel:#9fb9c6; --accent:#ff6b4a; --accent-fg:#ffffff;
+  --ok:#1f9d6b; --shelf:#e4f1f6; --glow:#ffd36b;
+  --display:"Fredoka","Baloo 2",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0d1b22; --card:#15282f; --fg:#e4f2f7; --muted:#8fb0bd;
+  --ice:#1d3a46; --steel:#3c5c69; --accent:#ff7d60; --accent-fg:#1a0c08;
+  --ok:#3cc78f; --shelf:#1a333d; --glow:#ffcf5c; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+[hidden]{display:none!important}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:1.35rem;margin:0;text-wrap:balance}
+p{margin:0}
+.muted{color:var(--muted)}
+.card{background:var(--card);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 2px 0 var(--ice)}
+button{font:inherit;cursor:pointer;border:0}
+.btn{background:var(--accent);color:var(--accent-fg);font-family:var(--display);font-weight:600;font-size:1.2rem;
+  padding:14px 20px;border-radius:14px;width:100%;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:transparent;color:var(--muted);font-size:.95rem;padding:8px;border:2px solid var(--ice)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+.langs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lang{background:var(--shelf);color:var(--fg);border-radius:16px;padding:18px 10px;font-family:var(--display);font-weight:600;font-size:1.2rem;display:flex;flex-direction:column;align-items:center;gap:2px}
+.lang small{font-family:var(--body);font-weight:600;font-size:.8rem;color:var(--muted)}
+.lang:hover{background:var(--ice)}
+.langpill{background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.85rem;border:2px solid var(--ice)}
+input{font:inherit;font-size:1.15rem;padding:14px;border-radius:14px;border:2px solid var(--ice);background:var(--bg);color:var(--fg);width:100%}
+form{display:flex;flex-direction:column;gap:12px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;list-style:none;margin:0;padding:0}
+.steps li{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:.75rem;font-weight:700;color:var(--muted);min-width:0}
+.steps .dot{width:30px;height:30px;border-radius:50%;background:var(--ice);display:grid;place-items:center;font-family:var(--display);color:var(--fg)}
+.steps li.on{color:var(--fg)}
+.steps li.on .dot{background:var(--accent);color:var(--accent-fg)}
+.steps li.done .dot{background:var(--ok);color:#fff}
+.big{font-family:var(--display);font-size:2.4rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.slots{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0}
+.slot{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:var(--shelf);min-height:52px}
+.slot .av{width:32px;height:32px;border-radius:50%;background:var(--ice);display:grid;place-items:center;font-family:var(--display);font-weight:700;flex:none}
+.slot.filled .av{background:var(--accent);color:var(--accent-fg)}
+.slot.filled{animation:slide .35s ease-out}
+@keyframes slide{from{transform:translateX(-8px);opacity:.4}to{transform:none;opacity:1}}
+.slot .nm{flex:1;min-width:0;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot.empty .nm{color:var(--muted);font-weight:600;font-style:italic}
+.slot .st{font-size:.8rem;font-weight:800;color:var(--muted);white-space:nowrap}
+.slot .st.ready{color:var(--ok)}
+.slot.me{outline:2px solid var(--accent)}
+.fridge{background:var(--card);border:4px solid var(--steel);border-radius:28px 28px 18px 18px;padding:18px 14px 14px;position:relative;display:flex;flex-direction:column;gap:8px}
+.fridge::before{content:"";position:absolute;right:-10px;top:40px;width:8px;height:70px;border-radius:6px;background:var(--steel)}
+.shelf{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--shelf);border-bottom:5px solid var(--ice);min-height:62px;transition:background .2s}
+.shelf .num{font-family:var(--display);font-weight:700;font-size:1.5rem;width:34px;text-align:center;color:var(--muted);flex:none}
+.shelf .lbl{display:flex;flex-direction:column;min-width:0;flex:1}
+.shelf .lbl small{color:var(--muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.shelf .who{font-family:var(--display);font-weight:600;font-size:1.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shelf.flash{background:var(--glow)}
+.shelf.flash .who,.shelf.flash .num,.shelf.flash small{color:#2a1d00}
+.shelf.mine{background:var(--accent)}
+.shelf.mine .who,.shelf.mine .num,.shelf.mine small{color:var(--accent-fg)}
+.shelf.land{animation:pop .45s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+.count3{font-family:var(--display);font-size:5rem;font-weight:700;text-align:center;color:var(--accent);line-height:1;padding:30px 0;animation:pop .6s ease-out}
+.yours{text-align:center;display:flex;flex-direction:column;gap:4px}
+.yours .big{color:var(--accent)}
+.err{background:var(--shelf);border-radius:14px;padding:14px;font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.note{font-size:.85rem;text-align:center}
+.demo{background:var(--glow);color:#2a1d00;border-radius:12px;padding:8px 12px;font-weight:800;font-size:.85rem;text-align:center}
+.conn{font-size:.8rem;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.shelf.land,.slot.filled,.count3{animation:none}.btn{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">Sorteo de la Nevera</h1>
+    <button class="langpill" id="langBtn" hidden>ES</button>
+  </header>
+  <p class="demo" id="demoBanner" hidden data-t="demo"></p>
+
+  <section class="card" id="vLang" hidden>
+    <h2>Choose your language · Elige tu idioma</h2>
+    <div class="langs">
+      <button class="lang" data-l="es">Español<small>España</small></button>
+      <button class="lang" data-l="en">English<small>UK · US</small></button>
+      <button class="lang" data-l="pt">Português<small>Portugal · Brasil</small></button>
+      <button class="lang" data-l="fr">Français<small>France</small></button>
+    </div>
+  </section>
+
+  <ol class="steps" id="steps" hidden>
+    <li data-s="1"><span class="dot">1</span><span data-t="s1"></span></li>
+    <li data-s="2"><span class="dot">2</span><span data-t="s2"></span></li>
+    <li data-s="3"><span class="dot">3</span><span data-t="s3"></span></li>
+    <li data-s="4"><span class="dot">4</span><span data-t="s4"></span></li>
+  </ol>
+
+  <section class="card" id="vLoading" hidden><p class="muted" data-t="loading"></p></section>
+
+  <section class="card" id="vJoin" hidden>
+    <h2 data-t="joinTitle"></h2>
+    <p class="muted" data-t="joinHelp"></p>
+    <form id="joinForm">
+      <input id="nameInput" maxlength="24" autocomplete="off" required>
+      <button class="btn" id="joinBtn" type="submit" data-t="joinBtn"></button>
+    </form>
+    <p class="err" id="joinErr" hidden></p>
+    <button class="btn ghost" id="watchBtn" type="button" data-t="watch"></button>
+  </section>
+
+  <section class="card" id="vFull" hidden><h2 data-t="fullTitle"></h2><p class="muted" data-t="fullHelp"></p></section>
+
+  <section class="card" id="vLobby" hidden>
+    <div class="row">
+      <div style="flex:2;min-width:0"><h2 id="lobbyTitle"></h2><p class="muted" id="lobbyHelp"></p></div>
+      <div class="big" id="count">0/5</div>
+    </div>
+    <ul class="slots" id="slots"></ul>
+    <button class="btn" id="readyBtn" hidden></button>
+    <button class="btn ghost" id="leaveBtn" data-t="leave" hidden></button>
+    <button class="btn ghost" id="joinInstead" data-t="joinInstead" hidden></button>
+  </section>
+
+  <section class="card" id="vDraw" hidden>
+    <h2 id="drawTitle"></h2>
+    <div id="countdown" class="count3" hidden></div>
+    <div class="fridge" id="fridge"></div>
+    <div class="yours" id="yours" hidden></div>
+  </section>
+
+  <p class="conn" id="conn" hidden></p>
+  <button class="btn ghost" id="resetBtn" data-t="reset" hidden></button>
+</div>
+
+<script>
+const N = 5;
+// Shared channel for this raffle (ntfy.sh public pub/sub, no accounts). Change TOPIC to start a brand-new raffle.
+const TOPIC = "nevera-3efe546de00e";
+const ADMIN = "#org-d5192f1c";            // organiser link: add this to the URL to get the reset button
+const DEMO = location.hash === "#demo";
+const isAdmin = location.hash === ADMIN || DEMO;
+
+const T = {
+  es:{title:"Sorteo de la Nevera",s1:"Apúntate",s2:"Esperad a 5",s3:"Todos listos",s4:"¡Sorteo!",
+    demo:"MODO DEMO · los otros 4 jugadores son simulados",loading:"Conectando…",
+    joinTitle:"¿Cómo te llamas?",joinHelp:"Escribe tu nombre para entrar en el sorteo de los 5 espacios de la nevera. Solo se puede participar una vez por móvil.",joinBtn:"Entrar al sorteo",ph:"Tu nombre",
+    fullTitle:"El sorteo está completo",fullHelp:"Ya hay 5 personas apuntadas. Puedes ver el resultado aquí cuando se haga.",
+    waitTitle:"Esperando a los demás",waitHelp:n=>`Faltan ${n}. Comparte el enlace con tus compañeros de piso.`,
+    readyTitle:"¡Ya estáis los 5!",readyHelp:"Pulsa el botón. Cuando los 5 lo pulséis, el sorteo empieza solo, para todos a la vez.",
+    readyBtn:"¡Estoy listo! 🎲",waitingReady:n=>`Estás listo. Esperando a ${n} más…`,
+    empty:"Libre…",you:"tú",ready:"listo ✓",notReady:"esperando",leave:"Salir del sorteo",
+    watch:"👀 Solo quiero mirar (espectador)",joinInstead:"Quiero participar",specTitle:"Modo espectador",specHelp:n=>n>0?`Faltan ${n} personas por apuntarse.`:"Ya están los 5. Esperando a que todos pulsen «listo».",
+    drawing:"Sorteando…",done:"¡Este es el resultado!",yourSpace:"Tu espacio en la nevera",shelf:"Espacio",top:"arriba",bottom:"abajo",
+    reset:"Reiniciar el sorteo (organizador)",resetSure:"Pulsa otra vez para confirmar",err:"No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.",offline:"Sin conexión. Reintentando…"},
+  en:{title:"Fridge Draw",s1:"Sign up",s2:"Wait for 5",s3:"All ready",s4:"Draw!",
+    demo:"DEMO MODE · the other 4 players are simulated",loading:"Connecting…",
+    joinTitle:"What's your name?",joinHelp:"Type your name to enter the draw for the 5 fridge spaces. One entry per phone.",joinBtn:"Join the draw",ph:"Your name",
+    fullTitle:"The draw is full",fullHelp:"5 people have already signed up. You can see the result here once it's done.",
+    waitTitle:"Waiting for the others",waitHelp:n=>`${n} more to go. Share the link with your flatmates.`,
+    readyTitle:"All 5 are here!",readyHelp:"Press the button. When all 5 of you press it, the draw starts by itself, for everyone at once.",
+    readyBtn:"I'm ready! 🎲",waitingReady:n=>`You're ready. Waiting for ${n} more…`,
+    empty:"Free…",you:"you",ready:"ready ✓",notReady:"waiting",leave:"Leave the draw",
+    watch:"👀 Just watch (spectator)",joinInstead:"I want to take part",specTitle:"Spectator mode",specHelp:n=>n>0?`${n} more people need to sign up.`:"All 5 are in. Waiting for everyone to press ready.",
+    drawing:"Drawing…",done:"Here's the result!",yourSpace:"Your fridge space",shelf:"Space",top:"top",bottom:"bottom",
+    reset:"Restart the draw (organiser)",resetSure:"Press again to confirm",err:"Couldn't send. Check your connection and try again.",offline:"Offline. Retrying…"},
+  pt:{title:"Sorteio do Frigorífico",s1:"Inscreve-te",s2:"Esperar por 5",s3:"Todos prontos",s4:"Sorteio!",
+    demo:"MODO DEMO · os outros 4 jogadores são simulados",loading:"A ligar…",
+    joinTitle:"Como te chamas?",joinHelp:"Escreve o teu nome para entrar no sorteio dos 5 espaços do frigorífico. Só se pode participar uma vez por telemóvel.",joinBtn:"Entrar no sorteio",ph:"O teu nome",
+    fullTitle:"O sorteio está completo",fullHelp:"Já há 5 pessoas inscritas. Podes ver o resultado aqui quando acontecer.",
+    waitTitle:"À espera dos outros",waitHelp:n=>`Faltam ${n}. Partilha o link com os teus colegas de casa.`,
+    readyTitle:"Já estão os 5!",readyHelp:"Carrega no botão. Quando os 5 carregarem, o sorteio começa sozinho, para todos ao mesmo tempo.",
+    readyBtn:"Estou pronto! 🎲",waitingReady:n=>`Estás pronto. À espera de mais ${n}…`,
+    empty:"Livre…",you:"tu",ready:"pronto ✓",notReady:"à espera",leave:"Sair do sorteio",
+    watch:"👀 Só quero ver (espectador)",joinInstead:"Quero participar",specTitle:"Modo espectador",specHelp:n=>n>0?`Faltam ${n} pessoas inscreverem-se.`:"Já estão os 5. À espera que todos carreguem em «pronto».",
+    drawing:"A sortear…",done:"Aqui está o resultado!",yourSpace:"O teu espaço no frigorífico",shelf:"Espaço",top:"em cima",bottom:"em baixo",
+    reset:"Reiniciar o sorteio (organizador)",resetSure:"Carrega outra vez para confirmar",err:"Não foi possível enviar. Verifica a ligação e tenta outra vez.",offline:"Sem ligação. A tentar de novo…"},
+  fr:{title:"Tirage du Frigo",s1:"Inscris-toi",s2:"Attendre 5",s3:"Tous prêts",s4:"Tirage !",
+    demo:"MODE DÉMO · les 4 autres joueurs sont simulés",loading:"Connexion…",
+    joinTitle:"Comment tu t'appelles ?",joinHelp:"Écris ton prénom pour participer au tirage des 5 places du frigo. Une seule participation par téléphone.",joinBtn:"Participer",ph:"Ton prénom",
+    fullTitle:"Le tirage est complet",fullHelp:"5 personnes sont déjà inscrites. Tu pourras voir le résultat ici.",
+    waitTitle:"On attend les autres",waitHelp:n=>`Il en manque ${n}. Partage le lien avec tes colocs.`,
+    readyTitle:"Vous êtes 5 !",readyHelp:"Appuie sur le bouton. Quand les 5 auront appuyé, le tirage démarre tout seul, pour tout le monde en même temps.",
+    readyBtn:"Je suis prêt ! 🎲",waitingReady:n=>`Tu es prêt. On attend encore ${n}…`,
+    empty:"Libre…",you:"toi",ready:"prêt ✓",notReady:"en attente",leave:"Quitter le tirage",
+    watch:"👀 Juste regarder (spectateur)",joinInstead:"Je veux participer",specTitle:"Mode spectateur",specHelp:n=>n>0?`Il manque encore ${n} inscrits.`:"Les 5 sont là. On attend que tout le monde soit prêt.",
+    drawing:"Tirage en cours…",done:"Voici le résultat !",yourSpace:"Ta place dans le frigo",shelf:"Place",top:"en haut",bottom:"en bas",
+    reset:"Recommencer le tirage (organisateur)",resetSure:"Appuie encore pour confirmer",err:"Impossible d'envoyer. Vérifie ta connexion et réessaie.",offline:"Hors ligne. Nouvelle tentative…"}
+};
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try{ return localStorage.getItem((DEMO?"demo-":"")+k); }catch(e){ return null; } },
+  set(k,v){ try{ v==null?localStorage.removeItem((DEMO?"demo-":"")+k):localStorage.setItem((DEMO?"demo-":"")+k,v); }catch(e){} }
+};
+let lang = store.get("lang");
+let spectator = store.get("spec")==="1";
+// device id: identifies this phone, so it can only take one spot
+let me = store.get("device");
+if(!me){ me = Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>b.toString(16).padStart(2,"0")).join(""); store.set("device",me); }
+
+let events=[], loaded=false, drawnKey=null, animating=false, resetArm=false;
+const t = k => (T[lang]||T.es)[k];
+
+/* ---------- shared event log ---------- */
+let send;
+if(DEMO){
+  send = async ev => { setTimeout(()=>{ addEvent({...ev, ts:Date.now()}); }, 150); };
+  setTimeout(()=>{ loaded=true; render(); }, 300);
+}else{
+  send = async ev => {
+    const r = await fetch("https://ntfy.sh/"+TOPIC, {method:"POST", body:JSON.stringify(ev)});
+    if(!r.ok) throw new Error("send");
+  };
+  let es, seen=new Set();
+  const connect = () => {
+    es = new EventSource(`https://ntfy.sh/${TOPIC}/sse?since=all`);
+    es.onopen = () => { $("conn").hidden=true; setTimeout(()=>{ loaded=true; render(); }, 600); };
+    es.onmessage = m => {
+      try{
+        const d=JSON.parse(m.data); if(d.event!=="message"||seen.has(d.id)) return; seen.add(d.id);
+        const ev=JSON.parse(d.message); ev.ts=d.time; addEvent(ev);
+      }catch(e){}
+    };
+    es.onerror = () => { $("conn").textContent=t("offline"); $("conn").hidden=!lang; };
+  };
+  connect();
+}
+let renderQueued=false;
+function addEvent(ev){ events.push(ev); if(!renderQueued){ renderQueued=true; setTimeout(()=>{ renderQueued=false; render(); }, 50); } }
+
+function state(){
+  // replay events since the last reset
+  let start=0; events.forEach((e,i)=>{ if(e.t==="reset") start=i+1; });
+  const list=[]; const by={};
+  for(const e of events.slice(start)){
+    if(e.t==="join" && !by[e.dev] && e.name){ const p={id:e.dev,name:String(e.name).slice(0,24),seed:e.seed,ready:false}; by[e.dev]=p; list.push(p); }
+    else if(e.t==="leave" && by[e.dev] && !by[e.dev].ready){ list.splice(list.indexOf(by[e.dev]),1); delete by[e.dev]; }
+    else if(e.t==="ready" && by[e.dev] && list.indexOf(by[e.dev])<N){ by[e.dev].ready=true; }
+  }
+  return list;
+}
+
+/* ---------- demo bots ---------- */
+const BOTS=[["b1","Lucas"],["b2","Amélie"],["b3","João"],["b4","Sofía"]];
+let botsStarted=false, botsReady=false;
+function demoTick(players){
+  if(!DEMO) return;
+  const mine=players.find(p=>p.id===me);
+  if((mine||spectator) && !botsStarted){
+    botsStarted=true;
+    BOTS.forEach(([id,name],i)=>setTimeout(()=>send({t:"join",dev:id,name,seed:Math.random().toString(36)}), 1200*(i+1)));
+  }
+  const five=players.slice(0,N);
+  const botsIn=five.filter(p=>p.id.startsWith("b")).length===4;
+  if(botsIn && !botsReady && (spectator || mine?.ready || five.filter(p=>p.ready).length>0)){
+    botsReady=true;
+    BOTS.forEach(([id],i)=>setTimeout(()=>send({t:"ready",dev:id}), 900*(i+1)));
+  }
+}
+
+/* ---------- UI ---------- */
+function show(id){ ["vLang","vLoading","vJoin","vFull","vLobby","vDraw"].forEach(v=>$(v).hidden = v!==id); }
+function applyLang(){
+  document.querySelectorAll("[data-t]").forEach(el=>{ const v=t(el.dataset.t); if(typeof v==="string") el.textContent=v; });
+  $("title").textContent=t("title"); document.title=t("title"); $("nameInput").placeholder=t("ph");
+  $("langBtn").textContent=lang.toUpperCase(); $("langBtn").hidden=false;
+  document.documentElement.lang=lang; $("demoBanner").hidden=!DEMO;
+}
+document.querySelectorAll(".lang").forEach(b=>b.onclick=()=>{ lang=b.dataset.l; store.set("lang",lang); render(); });
+$("langBtn").onclick=()=>{ $("steps").hidden=true; $("resetBtn").hidden=true; show("vLang"); };
+
+function hash(str){ let h1=0xdeadbeef,h2=0x41c6ce57; for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);} h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); return h1>>>0; }
+function rng(a){ return ()=>{ a|=0;a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296; }; }
+function draw(five){
+  const sorted=[...five].sort((a,b)=>a.id<b.id?-1:1);
+  const r=rng(hash(sorted.map(p=>p.id+":"+p.seed).join("|")));
+  const order=[...sorted]; for(let i=order.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  return order;
+}
+function spaceLabel(i){ return i===0?t("top"):i===N-1?t("bottom"):""; }
+function setSteps(n){
+  $("steps").hidden=false;
+  $("steps").querySelectorAll("li").forEach(li=>{ const s=+li.dataset.s; li.className = s<n?"done":s===n?"on":""; li.querySelector(".dot").textContent = s<n?"✓":s; });
+}
+
+function render(){
+  if(!lang){ show("vLang"); return; }
+  applyLang();
+  if(!loaded){ show("vLoading"); return; }
+  const players=state();
+  demoTick(players);
+  $("resetBtn").hidden=!isAdmin || !players.length;
+  const five=players.slice(0,N);
+  const mine=five.find(p=>p.id===me);
+  const allReady=five.length===N && five.every(p=>p.ready);
+  if(allReady){ setSteps(5); renderDraw(five); return; }
+  drawnKey=null;
+  const missing=N-five.length;
+  const spec=!mine && spectator;
+  if(!mine && !spec){
+    if(five.length>=N){ setSteps(2); show("vFull"); return; }
+    setSteps(1); show("vJoin"); return;
+  }
+  show("vLobby"); setSteps(missing>0?2:3);
+  $("count").textContent=`${five.length}/${N}`;
+  renderSlots(five, missing);
+  $("joinInstead").hidden = !spec || missing<=0;
+  if(spec){
+    $("lobbyTitle").textContent="👀 "+t("specTitle"); $("lobbyHelp").textContent=t("specHelp")(missing);
+    $("readyBtn").hidden=true; $("leaveBtn").hidden=true; return;
+  }
+  const readyLeft=five.filter(p=>!p.ready).length;
+  if(missing>0){ $("lobbyTitle").textContent=t("waitTitle"); $("lobbyHelp").textContent=t("waitHelp")(missing); }
+  else { $("lobbyTitle").textContent=t("readyTitle"); $("lobbyHelp").textContent= mine.ready? t("waitingReady")(readyLeft) : t("readyHelp"); }
+  $("readyBtn").hidden = missing>0 || mine.ready; $("readyBtn").textContent=t("readyBtn");
+  $("leaveBtn").hidden = mine.ready;
+}
+let lastSlots="";
+function renderSlots(five, missing){
+  const sig=JSON.stringify([lang,five,missing]); if(sig===lastSlots) return; lastSlots=sig;
+  const ul=$("slots"); const prev=ul.children.length; ul.textContent="";
+  for(let i=0;i<N;i++){
+    const p=five[i]; const li=document.createElement("li");
+    li.className="slot "+(p?"filled":"empty")+(p&&p.id===me?" me":"");
+    if(p && i<prev && ul.dataset["f"+i]===p.id) li.style.animation="none";
+    ul.dataset["f"+i]=p?p.id:"";
+    const av=document.createElement("span"); av.className="av"; av.textContent=p?(p.name[0]||"?").toUpperCase():i+1;
+    const nm=document.createElement("span"); nm.className="nm"; nm.textContent=p?p.name+(p.id===me?` (${t("you")})`:""):t("empty");
+    li.append(av,nm);
+    if(p && missing===0){ const st=document.createElement("span"); st.className="st"+(p.ready?" ready":""); st.textContent=p.ready?t("ready"):t("notReady"); li.append(st); }
+    ul.append(li);
+  }
+}
+function fridgeRows(names, cls){
+  const f=$("fridge"); f.textContent="";
+  for(let i=0;i<N;i++){
+    const s=document.createElement("div"); s.className="shelf "+(cls[i]||"");
+    const n=document.createElement("span"); n.className="num"; n.textContent=i+1;
+    const l=document.createElement("span"); l.className="lbl";
+    const sm=document.createElement("small"); sm.textContent=t("shelf")+" "+(i+1)+(spaceLabel(i)?" · "+spaceLabel(i):"");
+    const w=document.createElement("span"); w.className="who"; w.textContent=names[i]||"?";
+    l.append(sm,w); s.append(n,l); f.append(s);
+  }
+}
+function renderDraw(five){
+  show("vDraw");
+  const key=five.map(p=>p.id+p.seed).join();
+  const order=draw(five);
+  const final=()=>{
+    animating=false; $("countdown").hidden=true; $("fridge").hidden=false;
+    $("drawTitle").textContent=t("done");
+    fridgeRows(order.map(p=>p.name+(p.id===me?` (${t("you")})`:"")), order.map(p=>p.id===me?"mine land":"land"));
+    const idx=order.findIndex(p=>p.id===me); const y=$("yours"); y.textContent="";
+    if(idx>=0){
+      const a=document.createElement("p"); a.className="muted"; a.textContent=t("yourSpace");
+      const b=document.createElement("div"); b.className="big"; b.textContent=t("shelf")+" "+(idx+1);
+      const c=document.createElement("p"); c.className="muted"; c.textContent=spaceLabel(idx);
+      y.append(a,b,c); y.hidden=false;
+    } else y.hidden=true;
+  };
+  if(drawnKey===key){ if(!animating) final(); return; }
+  drawnKey=key;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ final(); return; }
+  animating=true; $("yours").hidden=true; $("drawTitle").textContent=t("drawing");
+  const names=five.map(p=>p.name);
+  const cd=$("countdown"); $("fridge").hidden=true; cd.hidden=false;
+  let c=3;
+  const countStep=()=>{
+    if(drawnKey!==key) return;
+    if(c===0){ cd.hidden=true; $("fridge").hidden=false; spin(); return; }
+    cd.textContent=c; cd.style.animation="none"; cd.offsetHeight; cd.style.animation=""; c--; setTimeout(countStep,800);
+  };
+  let tick=0; const total=30;
+  const spin=()=>{
+    if(drawnKey!==key) return;
+    if(tick>=total){ final(); return; }
+    const sh=[...names].sort(()=>Math.random()-.5);
+    fridgeRows(sh, Array.from({length:N},(_,i)=>i===tick%N?"flash":""));
+    tick++; setTimeout(spin, 70+tick*tick*0.35);
+  };
+  countStep();
+}
+
+$("joinForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const name=$("nameInput").value.trim().slice(0,24); if(!name) return;
+  $("joinBtn").disabled=true; $("joinErr").hidden=true;
+  try{
+    const seed=Array.from(crypto.getRandomValues(new Uint32Array(2))).join("-");
+    await send({t:"join", dev:me, name, seed});
+    spectator=false; store.set("spec",null);
+  }catch(err){ $("joinErr").textContent=t("err"); $("joinErr").hidden=false; }
+  $("joinBtn").disabled=false;
+});
+$("readyBtn").onclick=async()=>{ $("readyBtn").disabled=true; try{ await send({t:"ready",dev:me}); }catch(e){} $("readyBtn").disabled=false; };
+$("leaveBtn").onclick=async()=>{ try{ await send({t:"leave",dev:me}); }catch(e){} };
+function setSpec(v){ spectator=v; store.set("spec",v?"1":null); render(); }
+$("watchBtn").onclick=()=>setSpec(true);
+$("joinInstead").onclick=()=>setSpec(false);
+$("resetBtn").onclick=async()=>{
+  if(!resetArm){ resetArm=true; $("resetBtn").textContent=t("resetSure"); setTimeout(()=>{resetArm=false;$("resetBtn").textContent=t("reset");},4000); return; }
+  resetArm=false; $("resetBtn").textContent=t("reset");
+  if(DEMO){ botsStarted=false; botsReady=false; }
+  try{ await send({t:"reset"}); }catch(e){}
+};
+render();
+</script>
+</body>
+</html>
