@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Panel del Sorteo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#eaf3f7;--card:#fff;--fg:#14303d;--muted:#5b7684;--ice:#cfe7f1;--shelf:#e4f1f6;--accent:#ff6b4a;--accent-fg:#fff;--danger:#d93a2b;--danger-fg:#fff;--ok:#1f9d6b;--wait:#b7791f;
+  --display:"Fredoka",system-ui,sans-serif;--body:"Nunito",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--bg:#0d1b22;--card:#15282f;--fg:#e4f2f7;--muted:#8fb0bd;--ice:#1d3a46;--shelf:#1a333d;--accent:#ff7d60;--accent-fg:#1a0c08;--danger:#ff6a5a;--danger-fg:#1a0806;--ok:#3cc78f;--wait:#f0b44c;color-scheme:dark}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(24px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+[hidden]{display:none!important}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--display);font-size:1.8rem;margin:0;line-height:1.1}
+h2{font-family:var(--display);font-size:1.25rem;margin:0}
+p{margin:0}.muted{color:var(--muted)}
+.card{background:var(--card);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.status{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pill{border-radius:999px;padding:4px 12px;font-weight:800;font-size:.85rem;background:var(--shelf)}
+.pill.ok{background:var(--ok);color:#fff}
+.pill.wait{color:var(--wait)}
+.big{font-family:var(--display);font-size:2.2rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+li{background:var(--shelf);border-radius:12px;padding:10px 14px;font-weight:800;display:flex;align-items:center;gap:12px}
+li .n{font-family:var(--display);font-size:1.3rem;width:28px;text-align:center;color:var(--muted);flex:none}
+li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+li .s{color:var(--muted);font-weight:600;font-size:.85rem;white-space:nowrap}
+li .s.ok{color:var(--ok)}
+li.none{color:var(--muted);font-weight:600;font-style:italic}
+.result li{background:var(--accent);color:var(--accent-fg)}
+.result li .n,.result li .s{color:var(--accent-fg);opacity:.85}
+.hist{display:flex;flex-direction:column;gap:14px}
+.hist .round{display:flex;flex-direction:column;gap:6px}
+.hist .round p{font-weight:800}
+.hist li{background:var(--shelf);color:var(--fg)}
+button{font:inherit;cursor:pointer;border:0;width:100%;border-radius:14px;padding:14px;font-family:var(--display);font-size:1.15rem;font-weight:600}
+.danger{background:var(--danger);color:var(--danger-fg)}
+.ghost{background:transparent;border:2px solid var(--ice);color:var(--muted);font-size:1rem}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible{outline:3px solid #ffd36b;outline-offset:2px}
+.confirm{display:flex;flex-direction:column;gap:8px}
+.msg{font-weight:800;text-align:center}.msg.ok{color:var(--ok)}
+.err{background:var(--shelf);border-radius:14px;padding:16px;font-weight:700}
+a{color:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔧 Panel del organizador</h1>
+  <p class="muted">Solo para ti. No compartas este enlace: con él se puede reiniciar el sorteo.</p>
+
+  <p class="err" id="badKey" hidden>Este enlace de organizador no es válido. Usa el enlace completo que te dieron (termina en <b>#k=…</b>).</p>
+
+  <section class="card">
+    <div class="status">
+      <h2>Sorteo actual</h2>
+      <span class="pill" id="pill">Conectando…</span>
+    </div>
+    <div class="status">
+      <p class="muted" id="statusText">Cargando…</p>
+      <span class="big" id="count">–/5</span>
+    </div>
+    <ul id="list"></ul>
+  </section>
+
+  <section class="card" id="resultCard" hidden>
+    <h2>🧊 Resultado</h2>
+    <ul class="result" id="result"></ul>
+  </section>
+
+  <section class="card" id="histCard" hidden>
+    <h2>Sorteos anteriores (de hoy)</h2>
+    <div class="hist" id="hist"></div>
+  </section>
+
+  <section class="card" id="resetCard">
+    <h2>Reiniciar</h2>
+    <p class="muted">Borra a todos los apuntados y el resultado actual. Todos tendrán que volver a entrar al link y apuntarse otra vez. El resultado de ahora quedará guardado abajo en "Sorteos anteriores".</p>
+    <button class="danger" id="resetBtn">Reiniciar el sorteo</button>
+    <div class="confirm" id="confirm" hidden>
+      <p class="msg">¿Seguro? Todos tendrán que apuntarse de nuevo.</p>
+      <button class="danger" id="yesBtn">Sí, reiniciar ahora</button>
+      <button class="ghost" id="noBtn">Cancelar</button>
+    </div>
+    <p class="msg" id="msg" hidden></p>
+  </section>
+
+  <p class="muted" style="text-align:center"><a href="./">Abrir el sorteo (el link de los participantes)</a></p>
+</div>
+<script>
+const TOPIC="nevera-3efe546de00e", N=5, RESET_HASH="898821f2-b2d94beb";
+const SPACES=["Espacio 1 · arriba","Espacio 2","Espacio 3","Espacio 4","Espacio 5 · abajo"];
+const $=id=>document.getElementById(id);
+function hash(str){ let h1=0xdeadbeef,h2=0x41c6ce57; for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);} h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); return h1>>>0; }
+function rng(a){ return ()=>{ a|=0;a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296; }; }
+const keyHash=s=>hash("nevera:"+s).toString(16)+"-"+hash(s+":frio").toString(16);
+// same draw as the participants' page, so the panel shows exactly what they saw
+function draw(five){
+  const sorted=[...five].sort((a,b)=>a.id<b.id?-1:1);
+  const r=rng(hash(sorted.map(p=>p.id+":"+p.seed).join("|")));
+  const order=[...sorted]; for(let i=order.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  return order;
+}
+const m=location.hash.match(/^#k=(.+)$/);
+const KEY=m?decodeURIComponent(m[1]):"";
+const keyOk=keyHash(KEY)===RESET_HASH;
+$("badKey").hidden=keyOk; $("resetCard").hidden=!keyOk;
+
+let events=[]; const seen=new Set();
+function rounds(){
+  const out=[]; let cur={events:[],start:null};
+  for(const e of events){
+    if(e.t==="reset" && typeof e.key==="string" && keyHash(e.key)===RESET_HASH){ cur.end=e.ts; out.push(cur); cur={events:[],start:e.ts}; }
+    else cur.events.push(e);
+  }
+  out.push(cur);
+  return out.map(r=>{
+    const list=[], by={};
+    for(const e of r.events){
+      if(e.t==="join"&&!by[e.dev]&&e.name){const p={id:e.dev,name:String(e.name).slice(0,24),seed:e.seed,ready:false,ts:e.ts};by[e.dev]=p;list.push(p);}
+      else if(e.t==="leave"&&by[e.dev]&&!by[e.dev].ready){list.splice(list.indexOf(by[e.dev]),1);delete by[e.dev];}
+      else if(e.t==="ready"&&by[e.dev]&&list.indexOf(by[e.dev])<N){by[e.dev].ready=true;by[e.dev].readyTs=e.ts;}
+    }
+    const five=list.slice(0,N);
+    const done=five.length===N&&five.every(p=>p.ready);
+    return {five, extra:list.slice(N), done, order:done?draw(five):null, when:done?Math.max(...five.map(p=>p.readyTs||0)):null, end:r.end};
+  });
+}
+const time=s=>s?new Date(s*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"";
+function li(n,name,s,cls){const l=document.createElement("li");const a=document.createElement("span");a.className="n";a.textContent=n;const b=document.createElement("span");b.className="nm";b.textContent=name;l.append(a,b);if(s!=null){const c=document.createElement("span");c.className="s"+(cls?" "+cls:"");c.textContent=s;l.append(c);}return l;}
+function resultList(ul,order){ ul.textContent=""; order.forEach((p,i)=>ul.append(li(i+1,p.name,SPACES[i]))); }
+
+function render(){
+  const rs=rounds(), cur=rs[rs.length-1];
+  const ul=$("list"); ul.textContent="";
+  $("count").textContent=cur.five.length+"/"+N;
+  if(!cur.five.length){ const l=document.createElement("li"); l.className="none"; l.textContent="Nadie apuntado todavía"; ul.append(l); }
+  cur.five.forEach((p,i)=>ul.append(li(i+1,p.name,p.ready?"listo ✓":"esperando",p.ready?"ok":"")));
+  if(cur.extra.length){ const l=document.createElement("li"); l.className="none"; l.textContent="Intentaron entrar con el sorteo lleno: "+cur.extra.map(p=>p.name).join(", "); ul.append(l); }
+  const readyN=cur.five.filter(p=>p.ready).length;
+  if(cur.done){ $("pill").textContent="✓ Terminado"; $("pill").className="pill ok"; $("statusText").textContent="Sorteo hecho a las "+time(cur.when)+"."; }
+  else if(cur.five.length<N){ $("pill").textContent="Apuntándose"; $("pill").className="pill wait"; $("statusText").textContent="Faltan "+(N-cur.five.length)+" por apuntarse."; }
+  else { $("pill").textContent="Esperando «listo»"; $("pill").className="pill wait"; $("statusText").textContent=readyN+" de 5 han pulsado «listo»."; }
+  $("resultCard").hidden=!cur.done;
+  if(cur.done) resultList($("result"),cur.order);
+  const past=rs.slice(0,-1).filter(r=>r.done).reverse();
+  $("histCard").hidden=!past.length;
+  const h=$("hist"); h.textContent="";
+  past.forEach(r=>{ const d=document.createElement("div"); d.className="round"; const p=document.createElement("p"); p.textContent="Sorteo de las "+time(r.when)+(r.end?" · reiniciado a las "+time(r.end):""); const u=document.createElement("ul"); resultList(u,r.order); d.append(p,u); h.append(d); });
+}
+let t=null;
+const es=new EventSource(`https://ntfy.sh/${TOPIC}/sse?since=all`);
+es.onopen=()=>{ setTimeout(render,600); };
+es.onerror=()=>{ $("pill").textContent="Sin conexión…"; $("pill").className="pill wait"; };
+es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.event!=="message"||seen.has(d.id))return;seen.add(d.id);const e=JSON.parse(d.message);e.ts=d.time;events.push(e);clearTimeout(t);t=setTimeout(render,50);}catch(e){}};
+
+$("resetBtn").onclick=()=>{$("resetBtn").hidden=true;$("confirm").hidden=false;$("msg").hidden=true;};
+$("noBtn").onclick=()=>{$("resetBtn").hidden=false;$("confirm").hidden=true;};
+$("yesBtn").onclick=async()=>{
+  $("yesBtn").disabled=true;
+  try{
+    const r=await fetch("https://ntfy.sh/"+TOPIC,{method:"POST",body:JSON.stringify({t:"reset",key:KEY})});
+    if(!r.ok) throw 0;
+    $("msg").textContent="✓ Sorteo reiniciado. Ya se pueden volver a apuntar."; $("msg").className="msg ok";
+  }catch(e){ $("msg").textContent="No se pudo reiniciar. Revisa tu conexión e inténtalo otra vez."; $("msg").className="msg"; }
+  $("msg").hidden=false; $("confirm").hidden=true; $("resetBtn").hidden=false; $("yesBtn").disabled=false;
+};
+</script>
+</body>
+</html>
